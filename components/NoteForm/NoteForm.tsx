@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNoteStore } from '@/lib/store/noteStore';
 import { createNote } from '@/lib/api';
 import { NOTE_TAGS } from '@/types/note';
@@ -13,9 +14,37 @@ interface NoteFormProps {
 
 export default function NoteForm({ createNoteAction }: NoteFormProps) {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const { draft, setDraft, clearDraft } = useNoteStore();
+
+  const mutation = useMutation({
+    mutationFn: async (e: React.FormEvent<HTMLFormElement>) => {
+      if (createNoteAction) {
+        const formData = new FormData(e.currentTarget);
+        const result = await createNoteAction(formData);
+        if (result && typeof result === 'object' && 'error' in result) {
+          throw new Error(result.error);
+        }
+      } else {
+        return await createNote({
+          title: draft.title,
+          content: draft.content,
+          tag: draft.tag,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['filteredNotes'] });
+      
+      clearDraft();
+      router.push('/notes?created=1');
+    },
+    onError: (err: Error) => {
+      console.error('Failed to create note:', err);
+      setError(err.message || 'Failed to create note. Please try again.');
+    }
+  });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -25,47 +54,17 @@ export default function NoteForm({ createNoteAction }: NoteFormProps) {
     setError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
     setError(null);
-    
-    try {
-      if (createNoteAction) {
-        const formData = new FormData(e.currentTarget);
-        const result = await createNoteAction(formData);
-        
-        if (result && typeof result === 'object' && 'error' in result && result.error) {
-          setError(result.error);
-          setIsSubmitting(false);
-          return;
-        }
-        
-        clearDraft();
-        router.push('/notes?created=1');
-      } else {
-        await createNote({
-          title: draft.title,
-          content: draft.content,
-          tag: draft.tag,
-        });
-        clearDraft();
-        router.push('/notes?created=1');
-      }
-    } catch (err) {
-      console.error('Failed to create note:', err);
-      setError('Failed to create note. Please check your connection and try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    mutation.mutate(e);
   };
 
   const handleCancel = () => {
     router.back();
   };
+
+  const isSubmitting = mutation.isPending;
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>

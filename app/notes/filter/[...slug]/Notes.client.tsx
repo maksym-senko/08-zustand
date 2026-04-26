@@ -18,26 +18,25 @@ const DEBOUNCE_DELAY = 300;
 const PER_PAGE = 12;
 
 export default function NotesClient({ initialFilter }: NotesClientProps) {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
   const tag = initialFilter === 'all' ? undefined : initialFilter;
 
-  // Дебаунс для пошукового запиту
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-      setCurrentPage(0); // Скидаємо на першу сторінку при новому пошуку
+      setCurrentPage(1);
     }, DEBOUNCE_DELAY);
 
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['filteredNotes', initialFilter, debouncedSearchQuery, currentPage],
+    queryKey: ['filteredNotes', tag, debouncedSearchQuery, currentPage],
     queryFn: () => fetchNotes({ 
-      page: currentPage + 1, // react-paginate використовує 0-based індексування
+      page: currentPage,
       perPage: PER_PAGE, 
       tag: tag,
       search: debouncedSearchQuery,
@@ -52,7 +51,7 @@ export default function NotesClient({ initialFilter }: NotesClientProps) {
   );
 
   const handlePageChange = (selectedItem: { selected: number }) => {
-    setCurrentPage(selectedItem.selected);
+    setCurrentPage(selectedItem.selected + 1);
   };
 
   if (isLoading) {
@@ -91,15 +90,15 @@ export default function NotesClient({ initialFilter }: NotesClientProps) {
           >
             All
           </Link>
-          {NOTE_TAGS.map((tag) => (
+          {NOTE_TAGS.map((tagName) => (
             <Link
-              key={tag}
-              href={`/notes/filter/${tag}`}
+              key={tagName}
+              href={`/notes/filter/${tagName}`}
               className={`${styles.tagLink} ${
-                tag === initialFilter ? styles.activeTag : ''
+                tagName === initialFilter ? styles.activeTag : ''
               }`}
             >
-              {tag}
+              {tagName}
             </Link>
           ))}
         </div>
@@ -121,7 +120,7 @@ export default function NotesClient({ initialFilter }: NotesClientProps) {
           {totalPages > 1 && (
             <Pagination 
               pageCount={totalPages}
-              forcePage={currentPage}
+              forcePage={currentPage - 1}
               onPageChange={handlePageChange}
             />
           )}
