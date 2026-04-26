@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    metadataBase: new URL(BASE_URL),
     openGraph: {
       title,
       description,

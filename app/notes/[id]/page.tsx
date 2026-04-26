@@ -1,27 +1,54 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { fetchNoteById } from '@/lib/api/notes';
-import { NoteDetails } from '@/components/NoteDetails/NoteDetails';
+import NoteDetailsClient from './NoteDetails.client';
 
-type Props = {
-  params: { id: string };
-};
+const BASE_URL = 'https://notehub-goit.vercel.app';
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const note = await fetchNoteById(params.id);
-
-  return {
-    title: `${note.title} | NoteHub`,
-    description: note.content.slice(0, 150),
-    openGraph: {
-      title: note.title,
-      description: note.content.slice(0, 150),
-      url: `https://your-domain.vercel.app/notes/${params.id}`,
-      images: ['https://ac.goit.global/fullstack/react/notehub-og-meta.jpg'],
-    },
-  };
+interface PageProps {
+  params: Promise<{ id: string }>;
 }
 
-export default async function NotePage({ params }: Props) {
-  const note = await fetchNoteById(params.id);
-  return <NoteDetails note={note} />;
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
+  try {
+    const note = await fetchNoteById(params.id);
+    
+    return {
+      title: `${note.title} | NoteHub`,
+      description: note.content.substring(0, 160),
+      metadataBase: new URL(BASE_URL),
+      openGraph: {
+        title: note.title,
+        description: note.content.substring(0, 160),
+        url: `${BASE_URL}/notes/${params.id}`,
+        images: ['https://ac.goit.global/fullstack/react/notehub-og-meta.jpg'],
+      },
+    };
+  } catch {
+    return {
+      title: 'Note not found | NoteHub',
+      description: 'The requested note does not exist or was deleted.',
+      metadataBase: new URL(BASE_URL),
+      openGraph: {
+        title: 'Note not found | NoteHub',
+        description: 'The requested note does not exist or was deleted.',
+        url: `${BASE_URL}/notes/${params.id}`,
+        images: ['https://ac.goit.global/fullstack/react/notehub-og-meta.jpg'],
+      },
+    };
+  }
+}
+
+export default async function NoteDetailPage(props: PageProps) {
+  const params = await props.params;
+  
+  let note;
+  try {
+    note = await fetchNoteById(params.id);
+  } catch {
+    notFound();
+  }
+  
+  return <NoteDetailsClient note={note} />;
 }

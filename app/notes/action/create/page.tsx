@@ -10,6 +10,7 @@ const BASE_URL = 'https://notehub-goit.vercel.app';
 export const metadata: Metadata = {
   title: 'Create Note | NoteHub',
   description: 'Create a new note to keep your thoughts organized.',
+  metadataBase: new URL(BASE_URL),
   openGraph: {
     title: 'Create Note | NoteHub',
     description: 'Create a new note to keep your thoughts organized.',

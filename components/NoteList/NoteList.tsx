@@ -1,54 +1,51 @@
 'use client';
-import Link from 'next/link';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { deleteNote } from '@/lib/api/notes';
-import type { Note } from '@/types/note';
-import css from './NoteList.module.css';
 
-interface NoteListProps {
+import Link from 'next/link';
+import { Note } from '@/types/note';
+import styles from './NoteList.module.css';
+
+interface NotesListProps {
   notes: Note[];
 }
 
-export const NoteList = ({ notes }: NoteListProps) => {
-  const queryClient = useQueryClient();
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: (id: string) => deleteNote(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-    },
-  });
-
-  if (notes.length === 0) {
-    return <p className={css.empty}>No notes found.</p>;
-  }
+export default function NotesList({ notes }: NotesListProps) {
+  const getTagColor = (tag: string) => {
+    const tagColors: Record<string, string> = {
+      Todo: styles.tagTodo,
+      Work: styles.tagWork,
+      Personal: styles.tagPersonal,
+      Meeting: styles.tagMeeting,
+      Shopping: styles.tagShopping,
+      Health: styles.tagHealth,
+      Education: styles.tagEducation,
+      Ideas: styles.tagIdeas,
+    };
+    return tagColors[tag] || styles.tagDefault;
+  };
 
   return (
-    <ul className={css.list}>
-      {notes.map(({ id, title, content, tag }) => (
-        <li key={id} className={css.listItem}>
-          <div className={css.content}>
-            <div className={css.header}>
-              <h2>{title}</h2>
-              <span className={css.tag}>{tag}</span>
+    <div className={styles.grid}>
+      {notes.map((note) => (
+        <Link href={`/notes/${note.id}`} key={note.id} className={styles.card}>
+          <div className={styles.cardContent}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>{note.title}</h3>
+              <span className={`${styles.tag} ${getTagColor(note.tag)}`}>
+                {note.tag}
+              </span>
             </div>
-            <p>{content}</p>
+            <p className={styles.cardPreview}>
+              {note.content.substring(0, 100)}
+              {note.content.length > 100 ? '...' : ''}
+            </p>
+            <div className={styles.cardFooter}>
+              <span className={styles.date}>
+                {new Date(note.createdAt).toLocaleDateString()}
+              </span>
+            </div>
           </div>
-          <div className={css.actions}>
-            <Link href={`/notes/${id}`} className={css.detailsBtn}>
-              View details
-            </Link>
-            <button 
-              type="button" 
-              className={css.deleteBtn}
-              onClick={() => mutate(id)}
-              disabled={isPending}
-            >
-              {isPending ? '...' : 'Delete'}
-            </button>
-          </div>
-        </li>
+        </Link>
       ))}
-    </ul>
+    </div>
   );
-};
+}

@@ -1,42 +1,53 @@
-import Providers from './providers';
-import { Roboto } from 'next/font/google';
-import { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import { Roboto } from "next/font/google";
+import { TanStackProvider } from "@/components/TanStackProvider/TanStackProvider";
+import Header from "@/components/Header/Header";
+import Footer from "@/components/Footer/Footer";
+import "./globals.css";
 
-const BASE_URL = 'https://notehub-goit.vercel.app';
-
+const BASE_URL = "https://notehub-goit.vercel.app";
 const roboto = Roboto({
-  weight: ['400', '500', '700'],
-  subsets: ['latin', 'cyrillic'],
-  display: 'swap',
-  variable: '--font-roboto',
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-roboto",
 });
 
 export const metadata: Metadata = {
+  title: "NoteHub",
+  description: "Manage your notes efficiently",
   metadataBase: new URL(BASE_URL),
-  title: 'NoteHub',
-  description: 'NoteHub helps you capture, organize and filter notes in one place.',
   openGraph: {
-    title: 'NoteHub',
-    description: 'NoteHub helps you capture, organize and filter notes in one place.',
+    title: "NoteHub",
+    description: "Manage your notes efficiently",
     url: BASE_URL,
-    images: ['https://ac.goit.global/fullstack/react/notehub-og-meta.jpg'],
+    images: ["https://ac.goit.global/fullstack/react/notehub-og-meta.jpg"],
   },
 };
 
-type RootLayoutProps = {
+export default function RootLayout({
+  children,
+  modal,
+}: {
   children: React.ReactNode;
   modal: React.ReactNode;
-};
-
-export default function RootLayout({ children, modal }: RootLayoutProps) {
+}) {
   return (
-    <html lang='uk' className={roboto.variable}>
-      <body>
-        <Providers>
-          {children}
-          {modal}
-        </Providers>
+    <html lang="en">
+      <body className={roboto.variable} suppressHydrationWarning>
+        <TanStackProvider>
+          <div className="layout-wrapper">
+            <Header />
+
+            <main>{children}</main>
+
+            {modal}
+
+            <Footer />
+          </div>
+          
+          <div id="modal-root"></div>
+        </TanStackProvider>
       </body>
     </html>
   );
