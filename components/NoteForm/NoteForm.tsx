@@ -83,7 +83,7 @@ export default function NoteForm({ createNoteAction }: NoteFormProps) {
           type="text"
           id="title"
           name="title"
-          defaultValue={draft.title}
+          value={draft.title}
           onChange={handleChange}
           required
           className={styles.input}
@@ -99,7 +99,7 @@ export default function NoteForm({ createNoteAction }: NoteFormProps) {
         <select
           id="tag"
           name="tag"
-          defaultValue={draft.tag}
+          value={draft.tag}
           onChange={handleChange}
           required
           className={styles.select}
@@ -120,7 +120,7 @@ export default function NoteForm({ createNoteAction }: NoteFormProps) {
         <textarea
           id="content"
           name="content"
-          defaultValue={draft.content}
+          value={draft.content}
           onChange={handleChange}
           required
           className={styles.textarea}
