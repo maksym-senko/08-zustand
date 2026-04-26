@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { InternalAxiosRequestConfig, AxiosError } from "axios";
 import type { Note } from "@/types/note";
 
 const API_BASE_URL = "https://notehub-public.goit.study/api";
@@ -10,7 +10,7 @@ const noteInstance = axios.create({
   },
 });
 
-noteInstance.interceptors.request.use((config) => {
+noteInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -20,11 +20,11 @@ noteInstance.interceptors.request.use((config) => {
 
 noteInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
+  (error: AxiosError) => {
     console.error(
       `API Error [${error.config?.url}]:`,
       error.response?.status,
-      error.response?.data
+      error.response?.data || "No details"
     );
     return Promise.reject(error);
   }
@@ -35,13 +35,13 @@ export interface NotesResponse {
   totalPages: number;
 }
 
-// Визначаємо чіткий інтерфейс для параметрів, уникаючи any
 interface FetchNotesQuery {
   page: number;
   perPage: number;
   tag?: string;
   search?: string;
 }
+
 
 export const fetchNotes = async ({
   tag,
@@ -54,20 +54,19 @@ export const fetchNotes = async ({
   perPage?: number;
   search?: string;
 }): Promise<NotesResponse> => {
-  
-  // Ініціалізуємо об'єкт з обов'язковими числовими полями
   const params: FetchNotesQuery = {
     page: Number(page),
     perPage: Number(perPage),
   };
 
-  // Додаємо опціональні поля тільки якщо вони мають валідне значення
-  if (tag && tag !== "all" && tag.trim() !== "") {
-    params.tag = tag;
+  const trimmedTag = tag?.trim();
+  if (trimmedTag && trimmedTag !== "all") {
+    params.tag = trimmedTag;
   }
 
-  if (search && search.trim() !== "") {
-    params.search = search.trim();
+  const trimmedSearch = search?.trim();
+  if (trimmedSearch) {
+    params.search = trimmedSearch;
   }
 
   try {
@@ -78,13 +77,10 @@ export const fetchNotes = async ({
   }
 };
 
+
 export const fetchNoteById = async (id: string): Promise<Note> => {
-  try {
-    const { data } = await noteInstance.get<Note>(`/notes/${id}`);
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  const { data } = await noteInstance.get<Note>(`/notes/${id}`);
+  return data;
 };
 
 export const createNote = async (note: {
@@ -93,27 +89,27 @@ export const createNote = async (note: {
   tag: string;
 }): Promise<Note> => {
   try {
-    const { data } = await noteInstance.post<Note>("/notes", note);
+    const payload = {
+      ...note,
+      tag: note.tag as Note['tag']
+    };
+    
+    const { data } = await noteInstance.post<Note>("/notes", payload);
     return data;
   } catch (error) {
+    console.error("Failed to create note:", error);
     throw error;
   }
 };
+
 
 export const deleteNote = async (id: string): Promise<Note> => {
-  try {
-    const { data } = await noteInstance.delete<Note>(`/notes/${id}`);
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  const { data } = await noteInstance.delete<Note>(`/notes/${id}`);
+  return data;
 };
 
+
 export const updateNote = async (id: string, note: Partial<Note>): Promise<Note> => {
-  try {
-    const { data } = await noteInstance.patch<Note>(`/notes/${id}`, note);
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  const { data } = await noteInstance.patch<Note>(`/notes/${id}`, note);
+  return data;
 };
