@@ -1,44 +1,47 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { createNote } from '@/lib/api/notes';
-import type { NoteTag } from '@/types/note';
+import { createNote } from '@/lib/api';
 import NoteForm from '@/components/NoteForm/NoteForm';
-import css from './CreateNote.module.css';
-
-const BASE_URL = 'https://notehub-goit.vercel.app';
+import styles from './CreateNote.module.css';
 
 export const metadata: Metadata = {
-  title: 'Create Note | NoteHub',
-  description: 'Create a new note to keep your thoughts organized.',
-  metadataBase: new URL(BASE_URL),
+  title: 'Створення нотатки | NoteHub',
+  description:
+    'Створіть нову нотатку з заголовком, тегом та вмістом. Ваші зміни автоматично зберігаються як чернетка.',
   openGraph: {
-    title: 'Create Note | NoteHub',
-    description: 'Create a new note to keep your thoughts organized.',
-    url: `${BASE_URL}/notes/action/create`,
+    title: 'Створення нової нотатки | NoteHub',
+    description: 'Додайте нову нотатку до вашої колекції',
+    url: 'https://your-vercel-app.vercel.app/notes/action/create',
     images: ['https://ac.goit.global/fullstack/react/notehub-og-meta.jpg'],
   },
 };
 
 async function createNoteAction(formData: FormData) {
   'use server';
-
-  const title = formData.get('title')?.toString().trim() ?? '';
-  const content = formData.get('content')?.toString().trim() ?? '';
-  const tag = (formData.get('tag')?.toString() ?? 'Todo') as NoteTag;
-
-  if (!title || !content) {
-    throw new Error('Title and content are required');
+  
+  const title = formData.get('title') as string;
+  const content = formData.get('content') as string;
+  const tag = formData.get('tag') as string;
+  
+  if (!title || !content || !tag) {
+    throw new Error('All fields are required');
   }
-
-  await createNote({ title, content, tag });
-  redirect('/notes?created=1');
+  
+  try {
+    const result = await createNote({ title, content, tag });
+    console.log('Note created successfully:', result);
+    redirect('/notes?created=1');
+  } catch (error) {
+    console.error('Failed to create note:', error);
+    return { error: 'Failed to create note. Please try again.' };
+  }
 }
 
 export default function CreateNotePage() {
   return (
-    <main className={css.main}>
-      <div className={css.container}>
-        <h1 className={css.title}>Create note</h1>
+    <main className={styles.main}>
+      <div className={styles.container}>
+        <h1 className={styles.title}>Create note</h1>
         <NoteForm createNoteAction={createNoteAction} />
       </div>
     </main>

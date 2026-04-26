@@ -1,53 +1,42 @@
-import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
-import { TanStackProvider } from "@/components/TanStackProvider/TanStackProvider";
-import Header from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Roboto } from 'next/font/google';
+import Providers from './providers';
+import Header from '@/components/Header/Header';
+import Footer from '@/components/Footer/Footer';
+import './globals.css';
 
-const BASE_URL = "https://notehub-goit.vercel.app";
 const roboto = Roboto({
-  weight: ["400", "500", "700"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-roboto",
+  weight: ['400', '500', '700'],
+  variable: '--font-roboto',
+  display: 'swap',
+  subsets: ['latin', 'cyrillic'],
 });
 
 export const metadata: Metadata = {
-  title: "NoteHub",
-  description: "Manage your notes efficiently",
-  metadataBase: new URL(BASE_URL),
+  title: 'NoteHub | Ваш особистий менеджер нотаток',
+  description:
+    'Створюйте, редагуйте та організовуйте свої нотатки. Простий та зручний інструмент для ведення записів.',
   openGraph: {
-    title: "NoteHub",
-    description: "Manage your notes efficiently",
-    url: BASE_URL,
-    images: ["https://ac.goit.global/fullstack/react/notehub-og-meta.jpg"],
+    title: 'NoteHub - Менеджер нотаток',
+    description: 'Організуйте свої думки з NoteHub',
+    url: 'https://your-vercel-app.vercel.app',
+    images: ['https://ac.goit.global/fullstack/react/notehub-og-meta.jpg'],
   },
 };
 
 export default function RootLayout({
   children,
-  modal,
 }: {
   children: React.ReactNode;
-  modal: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={roboto.variable} suppressHydrationWarning>
-        <TanStackProvider>
-          <div className="layout-wrapper">
-            <Header />
-
-            <main>{children}</main>
-
-            {modal}
-
-            <Footer />
-          </div>
-          
-          <div id="modal-root"></div>
-        </TanStackProvider>
+    <html lang="uk" className={roboto.variable} suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <Providers>
+          <Header />
+          <main>{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

@@ -1,43 +1,88 @@
 import { Metadata } from 'next';
-import { NotesPage } from '@/components/NotesPage/NotesPage';
+import Link from 'next/link';
+import { fetchNotes } from '@/lib/api';
+import NotesList from '@/components/NoteList/NoteList';
+import { NOTE_TAGS } from '@/types/note';
+import styles from './page.module.css';
 
-type Props = {
+interface PageProps {
   params: Promise<{ slug: string[] }>;
-};
+}
 
-const BASE_URL = 'https://notehub-goit.vercel.app';
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const rawTag = slug[0] ?? 'all';
-  const visibleTag = rawTag === 'all' ? 'All notes' : rawTag;
-  const title = `${visibleTag} | NoteHub`;
-  const description =
-    rawTag === 'all'
-      ? 'Browse all notes on NoteHub.'
-      : `Browse all notes filtered by ${rawTag}.`;
-
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
+  const filter = params.slug.join('/');
+  
   return {
-    title,
-    description,
-    metadataBase: new URL(BASE_URL),
+    title: `Нотатки: ${filter} | NoteHub`,
+    description: `Перегляд нотаток відфільтрованих за категорією "${filter}"`,
     openGraph: {
-      title,
-      description,
-      url: `${BASE_URL}/notes/filter/${rawTag}`,
+      title: `Фільтр нотаток - ${filter}`,
+      description: `Перегляд нотаток у категорії ${filter}`,
+      url: `https://your-vercel-app.vercel.app/notes/filter/${filter}`,
       images: ['https://ac.goit.global/fullstack/react/notehub-og-meta.jpg'],
     },
   };
 }
 
-export default async function FilterPage({ params }: Props) {
-  const { slug } = await params;
-  const rawTag = slug[0] ?? 'all';
-  const tag = rawTag === 'all' ? undefined : rawTag;
-
+export default async function FilteredNotesPage(props: PageProps) {
+  const params = await props.params;
+  const filter = params.slug.join('/');
+  
+  // Якщо filter === "all", отримуємо всі нотатки
+  const tag = filter === 'all' ? undefined : filter;
+  const response = await fetchNotes({ page: 1, perPage: 100, tag });
+  const notes = response.notes;
+  
   return (
-    <main>
-      <NotesPage tag={tag} />
+    <main className={styles.main} suppressHydrationWarning>
+      <div className={styles.container} suppressHydrationWarning>
+        <div className={styles.header} suppressHydrationWarning>
+          <Link href="/notes" className={styles.backButton}>
+            ← Back to all notes
+          </Link>
+          <h1 className={styles.title}>Notes tagged: {filter}</h1>
+        </div>
+        
+        <div className={styles.tagsSection}>
+          <h2 className={styles.tagsTitle}>Filter by tag:</h2>
+          <div className={styles.tagsList}>
+            <Link
+              href="/notes/filter/all"
+              className={`${styles.tagLink} ${filter === 'all' ? styles.activeTag : ''}`}
+            >
+              All
+            </Link>
+            {NOTE_TAGS.map((tag) => (
+              <Link
+                key={tag}
+                href={`/notes/filter/${tag}`}
+                className={`${styles.tagLink} ${
+                  tag === filter ? styles.activeTag : ''
+                }`}
+              >
+                {tag}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {notes.length === 0 ? (
+          <div className={styles.empty}>
+            <p>No notes found with tag: {filter === 'all' ? 'all' : filter}</p>
+            <Link href="/notes/action/create" className={styles.createLink}>
+              Create your first note with this tag
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className={styles.resultsCount}>
+              Found {notes.length} note{notes.length !== 1 ? 's' : ''}
+            </div>
+            <NotesList notes={notes} />
+          </>
+        )}
+      </div>
     </main>
   );
 }
