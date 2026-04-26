@@ -3,56 +3,61 @@
 }
 
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 32px auto;
-  padding: 24px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 32px;
+  background-color: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
 }
 
 .item {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 8px;
+  align-items: flex-start;
+  gap: 16px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 16px;
 }
 
 .header h2 {
   margin: 0;
-  font-size: 28px;
-  color: #333;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .content {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 26px;
-  color: #444;
+  color: var(--text-secondary);
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .date {
-  font-size: 14px;
-  color: #444;
+  font-size: 13px;
+  color: var(--text-light);
   text-align: right;
+  font-weight: 500;
 }
 
 .tag {
   display: inline-block;
-  padding: 4px 8px;
+  padding: 6px 14px;
   font-size: 12px;
-  color: #0d6efd;
-  background-color: #e7f1ff;
-  border: 1px solid #b6d4fe;
-  border-radius: 12px;
-  max-width: 100px;
+  font-weight: 600;
+  color: var(--primary-color);
+  background-color: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: 20px;
+  max-width: 140px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -60,13 +65,19 @@
 
 .backBtn {
   align-self: flex-start;
-  padding: 6px 12px;
+  padding: 10px 16px;
   font-size: 14px;
-  color: #000000;
+  color: var(--primary-color);
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
   display: inline-block;
-  background-color: transparent;
+  background-color: var(--bg-tertiary);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background-color: var(--border-color);
 }

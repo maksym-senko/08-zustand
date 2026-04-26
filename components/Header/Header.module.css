@@ -2,20 +2,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: #333;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   color: white;
+  box-shadow: var(--shadow-md);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .headerLink {
   text-decoration: none;
   color: white;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  transition: opacity 0.2s ease;
 }
 
 .headerLink:hover {
-  color: #ddd;
+  opacity: 0.9;
 }
 
 .navigation {
@@ -23,7 +27,7 @@
   margin: 0;
   padding: 0;
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .navigationItem {
@@ -34,9 +38,27 @@
 .navigationLink {
   text-decoration: none;
   color: white;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+  position: relative;
+}
+
+.navigationLink::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.6);
+  transition: width 0.3s ease;
 }
 
 .navigationLink:hover {
-  color: #ddd;
+  opacity: 0.9;
+}
+
+.navigationLink:hover::after {
+  width: 100%;
 }
