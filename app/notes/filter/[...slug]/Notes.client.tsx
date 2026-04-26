@@ -6,7 +6,6 @@ import { fetchNotes } from '@/lib/api';
 import NotesList from '@/components/NoteList/NoteList';
 import { Pagination } from '@/components/Pagination/Pagination';
 import { SearchBox } from '@/components/SearchBox/SearchBox';
-import { NOTE_TAGS } from '@/types/note';
 import styles from './page.module.css';
 import Link from 'next/link';
 
@@ -27,7 +26,7 @@ export default function NotesClient({ initialFilter }: NotesClientProps) {
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-      setCurrentPage(1);
+      setCurrentPage(1); 
     }, DEBOUNCE_DELAY);
 
     return () => clearTimeout(debounceTimer);
@@ -43,12 +42,10 @@ export default function NotesClient({ initialFilter }: NotesClientProps) {
     }),
   });
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(e.target.value);
-    },
-    []
-  );
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
 
   const handlePageChange = (selectedItem: { selected: number }) => {
     setCurrentPage(selectedItem.selected + 1);
@@ -81,34 +78,15 @@ export default function NotesClient({ initialFilter }: NotesClientProps) {
     <>
       <SearchBox value={searchQuery} onChange={handleSearchChange} />
 
-      <div className={styles.tagsSection}>
-        <h2 className={styles.tagsTitle}>Filter by tag:</h2>
-        <div className={styles.tagsList}>
-          <Link
-            href="/notes/filter/all"
-            className={`${styles.tagLink} ${initialFilter === 'all' ? styles.activeTag : ''}`}
-          >
-            All
-          </Link>
-          {NOTE_TAGS.map((tagName) => (
-            <Link
-              key={tagName}
-              href={`/notes/filter/${tagName}`}
-              className={`${styles.tagLink} ${
-                tagName === initialFilter ? styles.activeTag : ''
-              }`}
-            >
-              {tagName}
-            </Link>
-          ))}
-        </div>
-      </div>
 
       {notes.length === 0 ? (
         <div className={styles.empty}>
-          <p>No notes found {debouncedSearchQuery && `matching "${debouncedSearchQuery}"`} with tag: {initialFilter === 'all' ? 'all' : initialFilter}</p>
+          <p>
+            No notes found 
+            {debouncedSearchQuery && ` matching "${debouncedSearchQuery}"`}
+          </p>
           <Link href="/notes/action/create" className={styles.createLink}>
-            Create your first note with this tag
+            Create your first note
           </Link>
         </div>
       ) : (
@@ -116,11 +94,13 @@ export default function NotesClient({ initialFilter }: NotesClientProps) {
           <div className={styles.resultsCount}>
             Found {notes.length} note{notes.length !== 1 ? 's' : ''}
           </div>
+          
           <NotesList notes={notes} />
+          
           {totalPages > 1 && (
             <Pagination 
               pageCount={totalPages}
-              forcePage={currentPage - 1}
+              forcePage={currentPage - 1} 
               onPageChange={handlePageChange}
             />
           )}
